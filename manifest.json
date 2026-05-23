@@ -1,0 +1,11 @@
+{
+  "name": "Abunawas Kasir",
+  "short_name": "Kasir",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F0F4F8",
+  "theme_color": "#2563EB",
+  "icons": [
+    { "src": "qris.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
