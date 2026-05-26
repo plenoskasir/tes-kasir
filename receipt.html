@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<!--
+  receipt.html
+  ─────────────────────────────────────────────────────────────────
+  Standalone receipt preview page.
+  Used for:
+    • Direct URL share: /receipt/receipt.html?id=TRX-001
+    • Auto-print from POS after save
+    • Developer preview during maintenance
+  ─────────────────────────────────────────────────────────────────
+  URL params:
+    ?id=TRX-001       — show specific transaction
+    ?print=1          — auto print on load
+    ?mode=58mm        — print mode (58mm | 80mm | a4)
+    ?demo=1           — show demo receipt (no app data needed)
+  ─────────────────────────────────────────────────────────────────
+-->
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Struk — Abunawas</title>
+
+  <!-- Google Fonts (same as main app) -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Receipt Styles -->
+  <link rel="stylesheet" href="receipt.css">
+
+  <style>
+    /* ── Preview page chrome (screen only, hidden on print) ── */
+    body {
+      font-family : 'Plus Jakarta Sans', sans-serif;
+      background  : #F1F5F9;
+      margin      : 0;
+      padding     : 0;
+    }
+
+    .preview-toolbar {
+      background    : #0F172A;
+      color         : #fff;
+      padding       : 12px 20px;
+      display       : flex;
+      align-items   : center;
+      justify-content: space-between;
+      gap           : 12px;
+      flex-wrap     : wrap;
+      position      : sticky;
+      top           : 0;
+      z-index       : 100;
+    }
+
+    .preview-toolbar-brand {
+      font-weight   : 800;
+      font-size     : 14px;
+      letter-spacing: -0.3px;
+    }
+
+    .preview-toolbar-brand span { color: #93C5FD; }
+
+    .preview-actions {
+      display : flex;
+      gap     : 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .preview-btn {
+      padding       : 7px 14px;
+      border-radius : 8px;
+      font-size     : 12px;
+      font-weight   : 700;
+      border        : none;
+      cursor        : pointer;
+      transition    : all 0.15s;
+    }
+
+    .preview-btn-primary {
+      background : #2563EB;
+      color      : #fff;
+    }
+    .preview-btn-primary:hover { background: #1D4ED8; }
+
+    .preview-btn-ghost {
+      background : rgba(255,255,255,0.1);
+      color      : #fff;
+      border     : 1px solid rgba(255,255,255,0.2);
+    }
+    .preview-btn-ghost:hover { background: rgba(255,255,255,0.2); }
+
+    .preview-select {
+      padding       : 7px 10px;
+      border-radius : 8px;
+      font-size     : 12px;
+      font-weight   : 700;
+      border        : 1px solid rgba(255,255,255,0.2);
+      background    : rgba(255,255,255,0.1);
+      color         : #fff;
+      cursor        : pointer;
+      outline       : none;
+    }
+
+    .preview-canvas {
+      max-width  : 440px;
+      margin     : 24px auto;
+      padding    : 0 16px 40px;
+    }
+
+    .preview-card {
+      background    : #fff;
+      border-radius : 16px;
+      overflow      : hidden;
+      box-shadow    : 0 4px 24px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.05);
+    }
+
+    .preview-empty {
+      text-align  : center;
+      padding     : 60px 24px;
+      color       : #64748B;
+    }
+
+    .preview-empty h2 { font-size: 20px; margin-bottom: 8px; }
+
+    /* hide toolbar on print */
+    @media print { .preview-toolbar { display: none !important; } }
+  </style>
+</head>
+<body>
+
+  <!-- Toolbar (hidden on print) -->
+  <div class="preview-toolbar">
+    <div class="preview-toolbar-brand">
+      🧾 Abunawas <span>Receipt Preview</span>
+    </div>
+    <div class="preview-actions">
+      <select class="preview-select" id="mode-select" onchange="onModeChange(this.value)">
+        <option value="80mm">🖨️ 80mm</option>
+        <option value="58mm">🖨️ 58mm</option>
+        <option value="a4">📄 A4</option>
+      </select>
+      <button class="preview-btn preview-btn-ghost" onclick="window.history.back()">← Kembali</button>
+      <button class="preview-btn preview-btn-primary" onclick="doPrint()">🖨️ Print / Simpan PDF</button>
+    </div>
+  </div>
+
+  <!-- Receipt Canvas -->
+  <div class="preview-canvas">
+    <div class="preview-card" id="preview-card">
+      <div class="preview-empty">
+        <div style="font-size:48px;margin-bottom:16px">🧾</div>
+        <h2>Receipt Preview</h2>
+        <p>Memuat data transaksi...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts (load from parent directory) -->
+  <script src="receipt-utils.js"></script>
+  <script src="receipt-template.js"></script>
+  <script src="print.js"></script>
+
+  <script>
+    // ── Read URL params ───────────────────────────────────────────
+    const params   = new URLSearchParams(location.search);
+    const trxId    = params.get('id');
+    const autoPrint = params.get('print') === '1';
+    const mode     = params.get('mode') || '80mm';
+    const isDemo   = params.get('demo') === '1';
+
+    // ── Set print mode ────────────────────────────────────────────
+    ReceiptPrint.setMode(mode);
+    document.getElementById('mode-select').value = mode;
+
+    // ── Demo transaction (no app data needed) ────────────────────
+    const DEMO_TRX = {
+      id         : 'TRX-DEMO-001',
+      tgl        : new Date().toISOString().slice(0, 10),
+      pelanggan  : 'Budi Santoso',
+      wa         : '08123456789',
+      alamat     : 'Jl. Contoh No. 1, Malang',
+      kasir      : 'Admin',
+      no_cetak   : '007',
+      items      : [
+        { barang: 'Banner Flexi 3x1m', qty: 2, harga: 65000, total: 130000 },
+        { barang: 'Stiker Vinyl A3', qty: 10, harga: 8500, total: 85000 },
+        { barang: 'Cetak Undangan 100pcs', qty: 1, harga: 250000, total: 250000 },
+      ],
+      total      : 450000,
+      dibayar    : 200000,
+      sisa       : 250000,
+      bayar      : 'DP',
+      diskon     : 15000,
+      ongkir     : 0,
+    };
+
+    const DEMO_TOKO = {
+      nama    : 'ABUNAWAS',
+      sub     : 'Percetakan & Konveksi',
+      tagline : 'Melayani Digital Printing',
+      alamat  : 'Jl. Raya Percetakan No. 88, Malang',
+      rekening: [
+        { bank: 'BCA', no: '1234567890', an: 'CV Abunawas' },
+      ],
+      qrisImg       : '',
+      footerThanks  : 'Terima kasih atas kepercayaan Anda! 🙏',
+    };
+
+    // ── Load data from parent localStorage ───────────────────────
+    const loadFromStorage = (id) => {
+      try {
+        const raw  = localStorage.getItem('abunawas_toko');
+        const data = raw ? JSON.parse(raw) : null;
+        if (!data) return null;
+
+        const trx = (data.trx || []).find(t => t.id === id);
+        const toko = data;
+        return trx ? { trx, toko } : null;
+      } catch (e) {
+        return null;
+      }
+    };
+
+    // ── Render receipt ────────────────────────────────────────────
+    const render = () => {
+      const card = document.getElementById('preview-card');
+
+      let trx, toko;
+
+      if (isDemo) {
+        trx  = DEMO_TRX;
+        toko = DEMO_TOKO;
+      } else if (trxId) {
+        const loaded = loadFromStorage(trxId);
+        if (!loaded) {
+          card.innerHTML = `
+            <div class="preview-empty">
+              <div style="font-size:48px">⚠️</div>
+              <h2>Transaksi Tidak Ditemukan</h2>
+              <p>ID: <code>${trxId}</code></p>
+              <p style="margin-top:8px;font-size:12px;color:#94A3B8">
+                Pastikan dibuka dari browser yang sama dengan aplikasi kasir.
+              </p>
+            </div>`;
+          return;
+        }
+        trx  = loaded.trx;
+        toko = loaded.toko;
+      } else {
+        card.innerHTML = `
+          <div class="preview-empty">
+            <div style="font-size:48px">🧾</div>
+            <h2>Tidak Ada ID Transaksi</h2>
+            <p>Tambahkan <code>?id=TRX-xxx</code> atau <code>?demo=1</code></p>
+          </div>`;
+        return;
+      }
+
+      // Render by mode
+      const html = mode === '58mm'
+        ? ReceiptTemplate.buildThermal58(trx, toko)
+        : ReceiptTemplate.build(trx, toko, 'HARGA.jpg');
+
+      card.innerHTML = html;
+
+      // Auto print if param set
+      if (autoPrint) {
+        setTimeout(() => doPrint(), 800);
+      }
+    };
+
+    // ── Print ─────────────────────────────────────────────────────
+    const doPrint = () => {
+      window.print();
+    };
+
+    const onModeChange = (newMode) => {
+      ReceiptPrint.setMode(newMode);
+      render(); // re-render with new mode
+    };
+
+    // ── Init ──────────────────────────────────────────────────────
+    render();
+  </script>
+
+</body>
+</html>
