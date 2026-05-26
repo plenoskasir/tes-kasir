@@ -27,6 +27,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <link rel="stylesheet" href="addon-styles.css">
+  <script src="addon-features.js"></script>
 </head>
 <body>
 <div id="toast"></div>
@@ -264,17 +265,13 @@
             <div class="card" style="margin:0">
               <div class="card-t">Pembayaran</div>
               <div class="field">
-                <label>Status Pembayaran Awal</label>
-                <div class="radio-btn-group">
-                  <label class="radio-lbl r-hutang">
-                    <input type="radio" name="fi_bayar" value="Hutang" onchange="toggleDP('fi')"> Belum Lunas
-                  </label>
-                  <label class="radio-lbl r-dp">
-                    <input type="radio" name="fi_bayar" value="DP" onchange="toggleDP('fi')"> Titip Uang
-                  </label>
-                  <label class="radio-lbl r-lunas">
-                    <input type="radio" name="fi_bayar" value="Lunas" checked onchange="toggleDP('fi')"> Lunas ✔️
-                  </label>
+                <label>Metode Pembayaran</label>
+                <div class="radio-btn-group" style="flex-wrap:wrap;">
+                  <label class="radio-lbl"><input type="radio" name="fi_metode" value="Cash" checked> 💵 Cash</label>
+                  <label class="radio-lbl"><input type="radio" name="fi_metode" value="Transfer"> 🏦 Transfer</label>
+                  <label class="radio-lbl"><input type="radio" name="fi_metode" value="QRIS"> 📱 QRIS</label>
+                  <label class="radio-lbl"><input type="radio" name="fi_metode" value="E-Wallet"> 💳 E-Wallet</label>
+                  <label class="radio-lbl"><input type="radio" name="fi_metode" value="DP/Cicilan"> 💸 DP/Cicilan</label>
                 </div>
               </div>
               <div class="field" id="fi-dp-wrap" style="display:none; background:var(--amber-l); padding:16px; border-radius:12px; border:1px dashed var(--amber);">
