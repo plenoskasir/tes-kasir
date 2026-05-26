@@ -1,0 +1,49 @@
+# ═══════════════════════════════════════════
+# .gitignore — Abunawas Kasir
+# ═══════════════════════════════════════════
+
+# ── Konfigurasi sensitif (JANGAN PERNAH COMMIT) ──
+config.php
+.env
+.env.*
+*.env
+
+# ── Aset lokal (tidak perlu di repo) ──
+HARGA.jpg
+*.jpg
+*.jpeg
+!qris.png
+
+# ── Dependensi ──
+/vendor/
+/node_modules/
+
+# ── Cache & temp ──
+*.cache
+*.tmp
+*.log
+/tmp/
+/cache/
+/logs/
+
+# ── OS & Editor ──
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ── Build output ──
+/dist/
+/build/
+
+# ── PHP upload temp ──
+/uploads/tmp/
+
+# ── Backup lokal ──
+*.sql
+*.bak
+/backup/

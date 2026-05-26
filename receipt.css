@@ -1,0 +1,402 @@
+/* ═══════════════════════════════════════════════════════
+   receipt.css — Style Struk / Nota Abunawas Kasir
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Reset & Font ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif;
+  background: #f0f2f5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px;
+  color: #1e2432;
+}
+
+/* ── Container Utama ── */
+.receipt-wrapper {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Kartu Struk ── */
+.receipt-card {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+  overflow: hidden;
+  padding: 28px 24px;
+  position: relative;
+}
+
+/* ── Header Toko ── */
+.receipt-header {
+  text-align: center;
+  padding-bottom: 20px;
+  border-bottom: 2px dashed #e2e8f0;
+  margin-bottom: 20px;
+}
+
+.receipt-logo {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.receipt-store-name {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  color: #1e2432;
+}
+
+.receipt-store-sub {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* ── Badge Status ── */
+.receipt-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-top: 10px;
+}
+.badge-lunas  { background: #dcfce7; color: #16a34a; }
+.badge-dp     { background: #fef9c3; color: #ca8a04; }
+.badge-hutang { background: #fee2e2; color: #dc2626; }
+
+/* ── Info Transaksi ── */
+.receipt-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.receipt-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-size: 13px;
+}
+
+.receipt-meta-label {
+  color: #64748b;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-right: 12px;
+}
+
+.receipt-meta-value {
+  color: #1e2432;
+  font-weight: 700;
+  text-align: right;
+  word-break: break-word;
+}
+
+/* ── Divider ── */
+.receipt-divider {
+  border: none;
+  border-top: 2px dashed #e2e8f0;
+  margin: 16px 0;
+}
+
+/* ── Tabel Item ── */
+.receipt-items {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+
+.receipt-items thead th {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  padding: 8px 0;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+.receipt-items thead th:last-child,
+.receipt-items tbody td:last-child {
+  text-align: right;
+}
+
+.receipt-items tbody tr + tr td {
+  border-top: 1px solid #f1f5f9;
+}
+
+.receipt-items tbody td {
+  padding: 10px 0;
+  font-size: 13px;
+  vertical-align: top;
+  color: #1e2432;
+}
+
+.receipt-item-name { font-weight: 700; }
+.receipt-item-sub  { font-size: 11px; color: #94a3b8; margin-top: 2px; font-weight: 600; }
+
+.receipt-items tfoot td {
+  padding: 8px 0;
+  font-size: 13px;
+}
+
+/* ── Total ── */
+.receipt-total-section {
+  background: #eff6ff;
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.receipt-total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 4px 0;
+}
+.receipt-total-row .lbl { color: #64748b; font-weight: 600; }
+.receipt-total-row .val { font-weight: 700; font-family: 'DM Mono', monospace; color: #1e2432; }
+
+.receipt-grand-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1.5px solid rgba(59,130,246,0.3);
+  margin-top: 10px;
+  padding-top: 12px;
+}
+.receipt-grand-total .lbl {
+  font-size: 15px;
+  font-weight: 900;
+  color: #1e40af;
+}
+.receipt-grand-total .val {
+  font-size: 22px;
+  font-weight: 900;
+  color: #1e40af;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: -0.5px;
+}
+
+/* ── Sisa Piutang ── */
+.receipt-sisa {
+  background: #fff7ed;
+  border: 1px solid rgba(251,146,60,0.3);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.receipt-sisa .lbl { font-size: 13px; font-weight: 700; color: #c2410c; }
+.receipt-sisa .val { font-size: 18px; font-weight: 900; color: #c2410c; font-family: 'DM Mono', monospace; }
+
+/* ── Catatan ── */
+.receipt-note {
+  background: #f8fafc;
+  border-left: 4px solid #3b82f6;
+  border-radius: 0 10px 10px 0;
+  padding: 12px 14px;
+  font-size: 12px;
+  color: #475569;
+  font-weight: 600;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+/* ── Rekening Bank ── */
+.receipt-bank-section {
+  margin-bottom: 16px;
+}
+.receipt-bank-title {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+.receipt-bank-item {
+  display: flex;
+  justify-content: space-between;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+.receipt-bank-item .bank-name { font-weight: 800; color: #1e2432; }
+.receipt-bank-item .bank-no   { font-family: 'DM Mono', monospace; color: #3b82f6; font-weight: 700; letter-spacing: 0.5px; }
+.receipt-bank-item .bank-an   { font-size: 11px; color: #64748b; font-weight: 600; margin-top: 2px; }
+
+/* ── QRIS ── */
+.receipt-qris {
+  text-align: center;
+  margin-bottom: 16px;
+}
+.receipt-qris img {
+  max-width: 160px;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.receipt-qris-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-top: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── Footer Terima Kasih ── */
+.receipt-footer {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 2px dashed #e2e8f0;
+}
+.receipt-footer-emoji { font-size: 28px; margin-bottom: 6px; }
+.receipt-footer-msg {
+  font-size: 14px;
+  font-weight: 800;
+  color: #1e2432;
+}
+.receipt-footer-sub {
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* ── Tombol Aksi ── */
+.receipt-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-receipt {
+  flex: 1;
+  min-width: 120px;
+  padding: 14px 16px;
+  border: none;
+  border-radius: 14px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-receipt:active { transform: scale(0.97); }
+
+.btn-print {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(37,99,235,0.35);
+}
+.btn-print:hover { box-shadow: 0 6px 20px rgba(37,99,235,0.45); }
+
+.btn-whatsapp {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(22,163,74,0.35);
+}
+.btn-whatsapp:hover { box-shadow: 0 6px 20px rgba(22,163,74,0.45); }
+
+.btn-pdf {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(220,38,38,0.3);
+}
+.btn-pdf:hover { box-shadow: 0 6px 20px rgba(220,38,38,0.4); }
+
+.btn-back {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+.btn-back:hover { background: #e2e8f0; }
+
+/* ── Toast Notifikasi ── */
+#toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: #1e2432;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  z-index: 9999;
+  transition: transform 0.3s ease;
+  white-space: nowrap;
+  pointer-events: none;
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── Print Mode ── */
+@media print {
+  body {
+    background: #fff;
+    padding: 0;
+  }
+
+  .receipt-wrapper {
+    max-width: 100%;
+    gap: 0;
+  }
+
+  .receipt-card {
+    box-shadow: none;
+    border-radius: 0;
+    padding: 16px 12px;
+  }
+
+  .receipt-actions { display: none !important; }
+
+  #toast { display: none !important; }
+
+  .receipt-store-name { font-size: 16px; }
+  .receipt-grand-total .val { font-size: 18px; }
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  body { padding: 12px 8px; }
+  .receipt-card { padding: 20px 16px; }
+  .receipt-actions { flex-direction: column; }
+  .btn-receipt { min-width: 100%; }
+}
