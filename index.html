@@ -27,6 +27,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="receipt/receipt.css">
 </head>
 <body>
 <div id="toast"></div>
@@ -577,147 +578,80 @@
       <!-- PENGATURAN TOKO DINAMIS -->
       <div class="page" id="pg-setting">
         <div class="ph"><div class="pt">Pengaturan Toko</div><div class="ps">Ubah nomor rekening dinamis, kategori pengeluaran, dan sistem stok.</div></div>
-        
-        <div class="layout-aside">
+        <div>
+          <div class="card">
+            <div class="card-t">A. Daftar Rekening Bank & E-Wallet</div>
+            <div style="font-size:12px;color:var(--tx2);margin-bottom:14px;">Rekening ini akan otomatis tercetak di Struk PDF Pelanggan.</div>
+            <div id="set-rek-wrap"></div>
+            <button class="btn btn-ghost btn-sm" style="margin-top:10px;" onclick="tambahSetRek()">+ Tambah Rekening Lainnya</button>
+          </div>
+          <div class="card">
+            <div class="card-t">B1. Kategori Pengeluaran Toko</div>
+            <div id="set-kat-wrap" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;"></div>
+            <div style="display:flex;gap:8px;"><input id="set-kat-new" placeholder="Nama kategori baru..." style="flex:1;padding:8px 12px;border:1px solid var(--bdr);border-radius:8px;font-family:var(--fn);background:var(--surf);color:var(--tx);font-size:13px;"><button class="btn btn-blue btn-sm" onclick="tambahSetKat()">Tambah</button></div>
+          </div>
+          <div class="card">
+            <div class="card-t">B2. Kategori Produk / Cetakan Toko</div>
+            <div style="font-size:11px;color:var(--tx2);margin-bottom:10px;">Kategori ini muncul saat Bapak menambah/edit Data Barang Toko.</div>
+            <div id="set-katprod-wrap" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;"></div>
+            <div style="display:flex;gap:8px;"><input id="set-katprod-new" placeholder="Nama kategori produk baru..." style="flex:1;padding:8px 12px;border:1px solid var(--bdr);border-radius:8px;font-family:var(--fn);background:var(--surf);color:var(--tx);font-size:13px;"><button class="btn btn-blue btn-sm" onclick="tambahSetKatProd()">Tambah</button></div>
+          </div>
+          <div class="card">
+            <div class="card-t">B3. Satuan Jual Barang</div>
+            <div style="font-size:11px;color:var(--tx2);margin-bottom:10px;">Satuan ukur (pcs, meter, rim, paket, dll) untuk Master Barang.</div>
+            <div id="set-sat-wrap" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;"></div>
+            <div style="display:flex;gap:8px;"><input id="set-sat-new" placeholder="Satuan baru..." style="flex:1;padding:8px 12px;border:1px solid var(--bdr);border-radius:8px;font-family:var(--fn);background:var(--surf);color:var(--tx);font-size:13px;"><button class="btn btn-blue btn-sm" onclick="tambahSetSat()">Tambah</button></div>
+          </div>
+          <div class="card">
+            <div class="card-t">C. Pengaturan QRIS & Ongkir</div>
+            <div class="g2">
+              <div class="field"><label>Tarif Ongkos Kirim per KM (Rp)</label><input type="number" id="set-ongkir" placeholder="2000"></div>
+              <div class="field"><label>Link Gambar QRIS</label><input type="text" id="set-qris-img" placeholder="https://...link gambar QRIS..."></div>
+            </div>
+            <div class="field"><label>Link Teks QRIS (Untuk di WA)</label><input type="text" id="set-qris-wa" placeholder="https://...link QRIS WA..."></div>
+          </div>
+          <div class="card">
+            <div class="card-t">🤖 D. Konfigurasi AI (Gemini)</div>
+            <div style="font-size:11px;color:var(--tx2);margin-bottom:14px;line-height:1.6;">Masukkan API Key Google Gemini agar fitur Asisten AI bisa digunakan. Dapatkan gratis di <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--blue-d);font-weight:700;">aistudio.google.com</a></div>
+            <div class="field"><label>Google Gemini API Key</label><input type="password" id="set-gemini-key" placeholder="AIza..."></div>
+          </div>
+          <div class="card">
+            <div class="card-t">D. Fitur Opsional (Sistem Gudang)</div>
+            <label style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;cursor:pointer;"><input type="checkbox" id="set-use-stok" style="width:20px;height:20px;accent-color:var(--blue);"> Aktifkan Manajemen Stok Bahan Baku</label>
+            <div style="font-size:11px;color:var(--tx3);margin-top:8px;line-height:1.5;">Jika dicentang, menu Master Barang akan memunculkan kolom Stok, dan stok otomatis berkurang setiap ada Transaksi Kasir.</div>
+          </div>
+          <button class="btn btn-green btn-full" style="padding:18px;font-size:16px;font-weight:900;letter-spacing:1px;box-shadow:0 10px 25px -5px rgba(16,185,129,0.4);" onclick="simpanSetting()">💾 SIMPAN SEMUA PENGATURAN</button>
+
+          <!-- 🔐 NOTIFIKASI BOSS ONLY -->
+          <div id="setting-webhook-wrap" style="display:none;">
+            <div class="card" style="border:1px solid rgba(239,68,68,0.3);background:rgba(239,68,68,0.05);">
+              <div class="card-t" style="color:var(--red-d);">🔐 E. Notifikasi Boss (Telegram / WA)</div>
+              <div style="font-size:11px;color:var(--tx2);margin-bottom:14px;line-height:1.5;">Kirim rekap & alert otomatis ke Telegram/WA. <b>Hanya terlihat Owner.</b></div>
+              <div class="g2">
+                <div class="field" style="margin:0;"><label style="color:var(--red-d)">Telegram Bot Token</label>
+                  <input type="password" id="set-tg-token" placeholder="1234567890:AABBcc..." style="font-family:var(--mono);font-size:12px;">
+                </div>
+                <div class="field" style="margin:0;"><label style="color:var(--red-d)">Telegram Chat ID</label>
+                  <input type="text" id="set-tg-chatid" placeholder="-100xxxxxxxxx" style="font-family:var(--mono);">
+                </div>
+              </div>
+              <div class="field" style="margin-top:10px;"><label>WA Webhook URL (opsional)</label>
+                <input type="text" id="set-wa-webhook" placeholder="https://api.wa.me/webhook/..." style="font-family:var(--mono);font-size:11px;">
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;margin:12px 0;">
+                <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;cursor:pointer;"><input type="checkbox" id="notif-rekap-harian" style="accent-color:var(--red);width:16px;height:16px;"> Rekap harian saat logout/tutup toko</label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;cursor:pointer;"><input type="checkbox" id="notif-pengeluaran-besar" style="accent-color:var(--red);width:16px;height:16px;"> Alert pengeluaran besar (&gt;Rp 500rb)</label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;cursor:pointer;"><input type="checkbox" id="notif-skor-merah" style="accent-color:var(--red);width:16px;height:16px;"> Alert skor finansial zona merah</label>
+              </div>
+              <button class="btn btn-red btn-sm" onclick="testNotifTelegram()">📨 Test Kirim Notifikasi</button>
+            </div>
             <div class="card">
-               <div class="card-t">A. Daftar Rekening Bank & E-Wallet</div>
-               <div style="font-size:12px; color:var(--tx3); margin-bottom:16px;">Rekening ini akan otomatis tercetak di Struk PDF Pelanggan.</div>
-               <div id="set-rek-wrap" style="background:var(--surf2); padding:16px; border-radius:12px; border:1px solid var(--bdr); margin-bottom:16px;">
-                   <!-- Injeksi JS Rekening Dinamis -->
-               </div>
-               <button class="btn btn-ghost btn-sm" style="border:2px dashed var(--blue); color:var(--blue); width:100%; padding:12px; font-size:13px;" onclick="tambahSetRek()">+ Tambah Rekening Lainnya</button>
+              <div class="card-t">🧵 F. Template Konveksi Kustom</div>
+              <div style="font-size:11px;color:var(--tx2);margin-bottom:14px;">Tambah/ubah template di dropdown Kalkulator Produksi.</div>
+              <div id="custom-tpl-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;"></div>
+              <button class="btn btn-blue btn-sm" onclick="tambahCustomTemplate()">+ Tambah Template Baru</button>
             </div>
-            
-            <div style="display:flex; flex-direction:column; gap:20px;">
-                
-                <div class="card" style="margin:0;">
-                   <div class="card-t">B1. Kategori Pengeluaran Toko</div>
-                   <div id="set-kat-wrap" style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
-                       <!-- Injeksi JS Kategori Dinamis -->
-                   </div>
-                   <div style="display:flex; gap:12px;">
-                       <input type="text" id="set-new-kat" placeholder="Ketik kategori baru..." style="flex:1; padding:12px 16px; border:1px solid var(--bdr); border-radius:10px; font-family:var(--fn); font-size:13px;">
-                       <button class="btn btn-blue" onclick="tambahSetKat()">Tambah</button>
-                   </div>
-                </div>
-
-                <div class="card" style="margin:0;">
-                   <div class="card-t">B2. Kategori Produk / Cetakan Toko</div>
-                   <div style="font-size:11px; color:var(--tx3); margin-bottom:12px;">Kategori ini muncul saat Bapak menambah/edit Data Barang Toko.</div>
-                   <div id="set-kat-prod-wrap" style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
-                       <!-- Injeksi JS Kategori Dinamis -->
-                   </div>
-                   <div style="display:flex; gap:12px;">
-                       <input type="text" id="set-new-kat-prod" placeholder="Ketik kategori produk baru..." style="flex:1; padding:12px 16px; border:1px solid var(--bdr); border-radius:10px; font-family:var(--fn); font-size:13px;">
-                       <button class="btn btn-blue" onclick="tambahSetKatProduk()">Tambah</button>
-                   </div>
-                </div>
-
-                <div class="card" style="margin:0;">
-                   <div class="card-t">B3. Satuan Jual Barang</div>
-                   <div style="font-size:11px; color:var(--tx3); margin-bottom:12px;">Satuan ukur (pcs, meter, rim, paket, dll) untuk Master Barang.</div>
-                   <div id="set-satuan-wrap" style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
-                       <!-- Injeksi JS Satuan Dinamis -->
-                   </div>
-                   <div style="display:flex; gap:12px;">
-                       <input type="text" id="set-new-satuan" placeholder="Ketik satuan baru..." style="flex:1; padding:12px 16px; border:1px solid var(--bdr); border-radius:10px; font-family:var(--fn); font-size:13px;">
-                       <button class="btn btn-blue" onclick="tambahSetSatuan()">Tambah</button>
-                   </div>
-                </div>
-
-                <div class="card" style="margin:0;">
-                   <div class="card-t">C. Pengaturan QRIS & Ongkir</div>
-                   <div class="field"><label>Tarif Ongkos Kirim per KM (Rp)</label><input type="number" id="set-ongkir-km" placeholder="2000" style="font-family:var(--mono); font-weight:700;"></div>
-                   <div class="field"><label>Link Gambar QRIS</label>
-                       <input type="text" id="set-qris-img" placeholder="qris.png">
-                   </div>
-                   <div class="field"><label>Link Teks QRIS (Untuk di WA)</label>
-                       <input type="text" id="set-qris-link" placeholder="Misal: https://plenoskasir.github.io/Database-Percetakan-Abunawas/qris.png">
-                   </div>
-                </div>
-
-                <div class="card" style="margin:0; background:var(--purple-l); border-color:rgba(139,92,246,0.3);">
-                   <div class="card-t" style="color:#7C3AED;">🤖 D. Konfigurasi AI (Gemini)</div>
-                   <div style="font-size:12px; color:var(--tx2); margin-bottom:12px; line-height:1.5;">Masukkan API Key Google Gemini agar fitur Asisten AI bisa digunakan. Dapatkan gratis di <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#8B5CF6; font-weight:700;">aistudio.google.com</a></div>
-                   <div class="field" style="margin-bottom:8px;"><label style="color:#7C3AED;">Google Gemini API Key</label>
-                       <input type="password" id="set-gemini-key" placeholder="Paste API Key Anda di sini..." style="font-family:var(--mono); font-size:12px; border-color:#C4B5FD;">
-                   </div>
-                   <div id="ai-key-status" style="font-size:11px; margin-top:6px; font-weight:700;"></div>
-                </div>
-                
-                <div class="card" style="margin:0; background:var(--blue-l); border-color:rgba(59,130,246,0.3);">
-                   <div class="card-t" style="color:var(--blue-d)">D. Fitur Opsional (Sistem Gudang)</div>
-                   <label style="display:flex; align-items:center; gap:12px; cursor:pointer; font-weight:800; color:var(--blue-d); font-size:15px;">
-                       <input type="checkbox" id="set-use-stok" style="width:24px; height:24px; accent-color:var(--blue-d);">
-                       Aktifkan Manajemen Stok Bahan Baku
-                   </label>
-                   <div style="font-size:12px; color:var(--tx2); margin-top:8px; line-height:1.5;">Jika dicentang, menu Master Barang akan memunculkan kolom Stok, dan stok otomatis berkurang setiap ada Transaksi Kasir.</div>
-                </div>
-                
-                <button class="btn btn-green btn-full" style="padding:18px; font-size:16px; font-weight:900; letter-spacing:1px; box-shadow:0 10px 25px -5px rgba(16,185,129,0.4);" onclick="simpanSetting()">💾 SIMPAN SEMUA PENGATURAN</button>
-
-                <!-- 🔔 NOTIFIKASI WEBHOOK — BOSS ONLY -->
-                <div id="setting-webhook-wrap" style="display:none;">
-                  <div class="card" style="margin:0; border:1px solid rgba(239,68,68,0.3); background:var(--red-l);">
-                    <div class="card-t" style="color:var(--red-d);">🔔 E. Notifikasi Otomatis (Boss Only)</div>
-                    <p style="font-size:12px;color:var(--tx2);margin:0 0 16px;line-height:1.6;">Kirim laporan & alert otomatis ke Telegram atau WhatsApp kamu saat ada event penting.</p>
-                    <div class="g2">
-                      <div class="field" style="margin:0;">
-                        <label style="color:var(--red-d);">Telegram Bot Token</label>
-                        <input type="password" id="set-tg-token" placeholder="123456:ABC-DEF..." style="font-family:var(--mono);font-size:11px;border-color:rgba(239,68,68,0.4);">
-                      </div>
-                      <div class="field" style="margin:0;">
-                        <label style="color:var(--red-d);">Telegram Chat ID</label>
-                        <input type="text" id="set-tg-chatid" placeholder="-100123456789" style="font-family:var(--mono);border-color:rgba(239,68,68,0.4);">
-                      </div>
-                    </div>
-                    <div class="field" style="margin-top:12px;">
-                      <label style="color:var(--red-d);">WA Webhook URL (opsional)</label>
-                      <input type="text" id="set-wa-webhook" placeholder="https://api.wa.me/webhook/..." style="font-family:var(--mono);font-size:11px;border-color:rgba(239,68,68,0.4);">
-                    </div>
-                    <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;">
-                      <label style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;cursor:pointer;"><input type="checkbox" id="notif-rekap-harian" style="width:18px;height:18px;accent-color:var(--red-d);"> Kirim rekap harian saat toko tutup</label>
-                      <label style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;cursor:pointer;"><input type="checkbox" id="notif-pengeluaran-besar" style="width:18px;height:18px;accent-color:var(--red-d);"> Alert jika pengeluaran &gt; Rp 500.000</label>
-                      <label style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;cursor:pointer;"><input type="checkbox" id="notif-skor-merah" style="width:18px;height:18px;accent-color:var(--red-d);"> Alert jika skor finansial turun ke zona merah</label>
-                    </div>
-                    <button class="btn btn-red btn-sm" style="margin-top:14px;" onclick="testNotifTelegram()">📨 Test Kirim Notifikasi</button>
-                  </div>
-                </div>
-
-                <!-- BOSS ONLY: Notifikasi Webhook -->
-                <div id="boss-webhook-section" style="display:none;">
-                  <div class="card" style="margin:0; background:rgba(239,68,68,0.06); border-color:rgba(239,68,68,0.3);">
-                    <div class="card-t" style="color:var(--red-d);">🔐 E. Notifikasi Boss (Telegram / WA)</div>
-                    <div style="font-size:11px;color:var(--tx2);margin-bottom:14px;line-height:1.5;">Konfigurasi notifikasi otomatis ke Telegram atau WhatsApp saat ada event penting. <b>Hanya terlihat oleh Owner.</b></div>
-                    <div class="field"><label style="color:var(--red-d)">Telegram Bot Token</label>
-                      <input type="password" id="set-tg-token" placeholder="1234567890:AABBcc..." style="font-family:var(--mono);font-size:12px;">
-                    </div>
-                    <div class="field"><label style="color:var(--red-d)">Telegram Chat ID</label>
-                      <input type="text" id="set-tg-chatid" placeholder="-100xxxxxxxxx atau @username" style="font-family:var(--mono);font-size:12px;">
-                    </div>
-                    <div class="field"><label>WA Webhook URL (Opsional)</label>
-                      <input type="text" id="set-wa-webhook" placeholder="https://api.whatsapp.com/... atau fonnte/wablas" style="font-family:var(--mono);font-size:11px;">
-                    </div>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-                      <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;cursor:pointer;"><input type="checkbox" id="tg-notif-tutup" style="accent-color:var(--red);"> Rekap harian saat tutup toko</label>
-                      <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;cursor:pointer;"><input type="checkbox" id="tg-notif-besar" style="accent-color:var(--red);"> Alert pengeluaran besar (>Rp 500rb)</label>
-                      <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;cursor:pointer;"><input type="checkbox" id="tg-notif-skor" style="accent-color:var(--red);"> Alert skor finansial zona merah</label>
-                    </div>
-                    <div style="display:flex;gap:8px;">
-                      <button class="btn btn-ghost btn-sm" style="border-color:var(--red);color:var(--red-d);" onclick="simpanWebhookSetting()">💾 Simpan Webhook</button>
-                      <button class="btn btn-ghost btn-sm" onclick="testTelegramNotif()">🔔 Test Kirim</button>
-                    </div>
-                  </div>
-
-                  <!-- Custom Template Konveksi -->
-                  <div class="card" style="margin:0;">
-                    <div class="card-t">🧵 F. Template Konveksi Kustom</div>
-                    <div style="font-size:11px;color:var(--tx2);margin-bottom:14px;">Tambah/ubah template yang muncul di dropdown Kalkulator Produksi.</div>
-                    <div id="custom-tpl-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;"></div>
-                    <button class="btn btn-blue btn-sm" onclick="tambahCustomTemplate()">+ Tambah Template Baru</button>
-                  </div>
-                </div>
-            </div>
+          </div>
         </div>
       </div>
 
@@ -1308,7 +1242,15 @@
       <button class="btn btn-blue" style="flex:2; min-width:110px; padding:12px;" onclick="bagikanGambarNota()">🖼️ Bagikan Gambar</button>
       <button class="btn btn-wa" style="flex:1; min-width:100px; padding:12px;" onclick="kirimWANota()">📲 Teks Nota</button>
       <button class="btn btn-amber" style="flex:1; min-width:100px; padding:12px;" onclick="kirimWAInfoBayar()">💳 Info Bayar</button>
-      <button class="btn btn-ghost" style="flex:1; min-width:60px; border:2px solid var(--bdr);" onclick="window.print()">🖨️ Print</button>
+      <!-- Receipt Print System -->
+      <div style="display:flex;gap:6px;align-items:center;flex:2;min-width:160px;">
+        <select id="rcpt-print-mode" style="padding:9px 8px;border:1px solid var(--bdr);border-radius:8px;font-size:11px;font-weight:700;background:var(--surf);color:var(--tx);outline:none;flex:1;">
+          <option value="80mm">🖨️ 80mm</option>
+          <option value="58mm">🖨️ 58mm Mini</option>
+          <option value="a4">📄 A4/PDF</option>
+        </select>
+        <button class="btn btn-blue" style="padding:9px 14px;flex-shrink:0;" onclick="if(typeof ReceiptController!=='undefined'){ReceiptController.showPrintSelector();}else{window.print();}">Print</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1337,8 +1279,8 @@
 <!-- Tesseract.js CDN for OCR -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.4/tesseract.min.js"></script>
 
-<!-- ══ FLOATING AI CHATBOT WIDGET ══ -->
-<div id="fab-chat-btn" onclick="toggleFloatingChat()" style="position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#D946EF);color:#fff;font-size:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 30px rgba(124,58,237,0.45);z-index:9998;transition:all 0.3s;user-select:none;" title="Asisten Abunawas">🤖</div>
+<!-- ═══════ FLOATING AI CHATBOT (satu-satunya) ═══════ -->
+<div id="fab-chat-btn" onclick="toggleFloatingChat()" style="display:none;position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#D946EF);color:#fff;font-size:24px;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 30px rgba(124,58,237,0.45);z-index:9998;transition:all 0.3s;user-select:none;" title="Asisten Abunawas">🤖</div>
 
 <div id="fab-chat-panel" style="display:none;position:fixed;bottom:90px;right:16px;width:340px;max-width:calc(100vw - 32px);height:480px;background:var(--surf);border:1px solid var(--bdr);border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.25);z-index:9997;flex-direction:column;overflow:hidden;">
   <div style="background:linear-gradient(135deg,#7C3AED,#D946EF);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
@@ -1362,33 +1304,11 @@
   </div>
 </div>
 
-<!-- ═══════ FLOATING AI CHATBOT ═══════ -->
-<div id="float-chat-btn" onclick="toggleFloatChat()" style="display:none;position:fixed;bottom:24px;right:20px;z-index:9998;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#D946EF);box-shadow:0 8px 24px rgba(124,58,237,0.4);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;transition:all 0.3s;" title="Asisten Abunawas">🤖
-  <div id="float-chat-badge" style="display:none;position:absolute;top:-4px;right:-4px;width:18px;height:18px;background:#EF4444;border-radius:50%;font-size:10px;font-weight:900;color:#fff;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg);">!</div>
-</div>
-<div id="float-chat-box" style="display:none;position:fixed;bottom:90px;right:16px;z-index:9999;width:340px;max-width:calc(100vw - 32px);background:var(--surf);border:1px solid var(--bdr);border-radius:20px;box-shadow:0 16px 48px rgba(0,0,0,0.25);overflow:hidden;flex-direction:column;max-height:480px;">
-  <div style="background:linear-gradient(135deg,#7C3AED,#D946EF);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:16px;">🤖</div>
-      <div><div style="font-weight:800;color:#fff;font-size:14px;">Asisten Abunawas</div><div style="font-size:10px;color:rgba(255,255,255,0.8);">AI Keuangan & Percetakan</div></div>
-    </div>
-    <button onclick="toggleFloatChat()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;line-height:1;">×</button>
-  </div>
-  <div id="float-chat-msgs" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;max-height:300px;">
-    <div class="ai-bubble ai-bubble-bot"><div class="ai-bubble-ava">🤖</div><div class="ai-bubble-msg" style="font-size:12px;">Halo! Saya Asisten Abunawas. Tanya apa saja, atau ketik perintah seperti: <b>"catat belanja banner di vendor kuntri 400ribu"</b></div></div>
-  </div>
-  <div style="border-top:1px solid var(--bdr);padding:10px;background:var(--surf2);">
-    <div style="display:flex;gap:8px;">
-      <input id="float-chat-input" placeholder="Tanya atau perintah..." style="flex:1;padding:8px 12px;border:1px solid var(--bdr);border-radius:10px;font-size:12px;font-family:var(--fn);background:var(--surf);color:var(--tx);outline:none;" onkeydown="if(event.key==='Enter')kirimFloatChat()">
-      <button onclick="kirimFloatChat()" style="background:linear-gradient(135deg,#7C3AED,#D946EF);border:none;border-radius:10px;padding:8px 14px;color:#fff;font-size:16px;cursor:pointer;">↑</button>
-    </div>
-    <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
-      <span class="ai-quick-q" style="font-size:10px;padding:4px 10px;" onclick="floatQuickAsk('Laba bulan ini berapa?')">💰 Laba?</span>
-      <span class="ai-quick-q" style="font-size:10px;padding:4px 10px;" onclick="floatQuickAsk('Siapa yang belum bayar?')">⚠️ Piutang?</span>
-      <span class="ai-quick-q" style="font-size:10px;padding:4px 10px;" onclick="floatQuickAsk('Saran hemat bulan ini')">💡 Hemat?</span>
-    </div>
-  </div>
-</div>
+<!-- Receipt System (modular) -->
+<script src="receipt/receipt-utils.js"></script>
+<script src="receipt/receipt-template.js"></script>
+<script src="receipt/print.js"></script>
+<script src="receipt/receipt.js"></script>
 
 <script src="script.js"></script>
 </body>

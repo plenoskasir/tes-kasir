@@ -2166,14 +2166,14 @@ login = function() {
   }
 };
 
-// Patch logout
-var _origLogout = logout;
-logout = function() {
+// Patch logout (fungsi aslinya doLogout)
+var _origDoLogout = doLogout;
+doLogout = function() {
   if (curUser) {
     logActivity('LOGOUT','Auth',{label:'Logout — '+curUser.nama});
-    kirimRekapHarian(); // kirim rekap harian ke Telegram saat logout
+    kirimRekapHarian();
   }
-  _origLogout();
+  _origDoLogout();
 };
 
 // Patch saveData untuk tangkap aktivitas simpan transaksi, barang, dll.
@@ -3601,3 +3601,158 @@ login = function() {
     if(dl) dl.innerHTML = VENDORS.map(function(v){ return '<option value="'+v.nama+'">'; }).join('');
   }, 300);
 };
+
+/* ═══════════════════════════════════════════════════════════
+   🔧 MISSING FUNCTIONS FIX — fungsi yang dipanggil HTML
+   ═══════════════════════════════════════════════════════════ */
+
+// ── Floating chatbot (fab = floating action button) ──
+var _fabChatOpen = false;
+
+function toggleFloatingChat() {
+  _fabChatOpen = !_fabChatOpen;
+  var panel = document.getElementById('fab-chat-panel');
+  if (panel) panel.style.display = _fabChatOpen ? 'flex' : 'none';
+}
+
+function fabQuickAsk(q) {
+  var inp = document.getElementById('fab-chat-input');
+  if (inp) inp.value = q;
+  kirimFabChat();
+}
+
+async function kirimFabChat() {
+  var inp = document.getElementById('fab-chat-input');
+  if (!inp) return;
+  var pesan = inp.value.trim();
+  if (!pesan) return;
+  inp.value = '';
+
+  var msgs = document.getElementById('fab-chat-msgs');
+  if (!msgs) return;
+
+  // Tambah bubble user
+  var userDiv = document.createElement('div');
+  userDiv.className = 'ai-bubble ai-bubble-user';
+  userDiv.innerHTML = '<div class="ai-bubble-msg" style="font-size:12px;">'+pesan+'</div><div class="ai-bubble-ava" style="width:28px;height:28px;font-size:12px;background:linear-gradient(135deg,#3B82F6,#2563EB);">👤</div>';
+  msgs.appendChild(userDiv);
+
+  // Cek perintah auto-fill
+  var handled = await cekParsePerintah(pesan);
+  if (handled) return;
+
+  if (!apiKey) {
+    var nokey = document.createElement('div');
+    nokey.className = 'ai-bubble ai-bubble-bot';
+    nokey.innerHTML = '<div class="ai-bubble-ava" style="width:28px;height:28px;font-size:13px;">🤖</div><div class="ai-bubble-msg" style="font-size:12px;">⚠️ API Key Gemini belum diisi di Pengaturan Toko.</div>';
+    msgs.appendChild(nokey);
+    msgs.scrollTop = msgs.scrollHeight;
+    return;
+  }
+
+  // Typing indicator
+  var typingDiv = document.createElement('div');
+  typingDiv.className = 'ai-bubble ai-bubble-bot';
+  typingDiv.innerHTML = '<div class="ai-bubble-ava" style="width:28px;height:28px;font-size:13px;">🤖</div><div class="ai-bubble-msg" style="font-size:12px;opacity:0.5;">mengetik...</div>';
+  msgs.appendChild(typingDiv);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  var bulanIni = nowDate().substring(0,7);
+  var totalMasuk  = TRX.filter(function(t){return t.tgl&&t.tgl.startsWith(bulanIni);}).reduce(function(s,t){return s+(t.dibayar||0);},0);
+  var totalKeluar = PENGELUARAN.filter(function(p){return p.tgl&&p.tgl.startsWith(bulanIni);}).reduce(function(s,p){return s+(p.total||0);},0);
+  var piutangList = TRX.filter(function(t){return t.sisa>0;}).slice(0,5).map(function(t){return t.pelanggan+' Rp'+fmt(t.sisa);}).join(', ');
+
+  var ctx = 'Kamu asisten AI percetakan "' + (TOKO.nama||'Abunawas') + '". Jawab singkat & santai dalam Bahasa Indonesia.\n' +
+    'Data bulan ini: Pemasukan Rp ' + fmt(totalMasuk) + ', Pengeluaran Rp ' + fmt(totalKeluar) + ', Piutang: ' + (piutangList||'tidak ada') + '.';
+
+  try {
+    var resp = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+apiKey, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({contents:[{parts:[{text: ctx+'\n\nPertanyaan: '+pesan}]}]})
+    });
+    var data = await resp.json();
+    var jawaban = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Maaf, tidak bisa menjawab saat ini.';
+    typingDiv.querySelector('.ai-bubble-msg').innerHTML = jawaban.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<b>$1</b>');
+  } catch(e) {
+    typingDiv.querySelector('.ai-bubble-msg').textContent = '⚠️ Gagal terhubung ke AI. Cek koneksi.';
+  }
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+// ── Custom Template Konveksi ──
+var CUSTOM_TEMPLATES = JSON.parse(localStorage.getItem('abunawas_custom_tpl') || '[]');
+
+function renderCustomTemplateList() {
+  var el = document.getElementById('custom-tpl-list');
+  if (!el) return;
+  if (!CUSTOM_TEMPLATES.length) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--tx3);text-align:center;padding:10px;">Belum ada template kustom.</div>';
+    return;
+  }
+  el.innerHTML = CUSTOM_TEMPLATES.map(function(t, i) {
+    return '<div style="display:flex;gap:8px;align-items:center;padding:8px 12px;background:var(--surf2);border-radius:8px;border:1px solid var(--bdr);">' +
+      '<input value="'+t.nama+'" style="flex:1;border:1px solid var(--bdr);border-radius:6px;padding:6px 10px;font-size:12px;background:var(--surf);color:var(--tx);" oninput="CUSTOM_TEMPLATES['+i+'].nama=this.value;saveCustomTemplates();">' +
+      '<button class="btn btn-red btn-xs" onclick="hapusCustomTemplate('+i+')">✕</button>' +
+    '</div>';
+  }).join('');
+  // Sync ke dropdown kalkulator
+  syncTemplateDropdown();
+}
+
+function tambahCustomTemplate() {
+  var nama = prompt('Nama template baru:');
+  if (!nama || !nama.trim()) return;
+  CUSTOM_TEMPLATES.push({ nama: nama.trim(), rows: [] });
+  saveCustomTemplates();
+  renderCustomTemplateList();
+  toast('✅ Template "'+nama.trim()+'" ditambahkan!', 2000, 'success');
+}
+
+function hapusCustomTemplate(i) {
+  if (!confirm('Hapus template "'+CUSTOM_TEMPLATES[i].nama+'"?')) return;
+  CUSTOM_TEMPLATES.splice(i, 1);
+  saveCustomTemplates();
+  renderCustomTemplateList();
+}
+
+function saveCustomTemplates() {
+  localStorage.setItem('abunawas_custom_tpl', JSON.stringify(CUSTOM_TEMPLATES));
+  syncTemplateDropdown();
+}
+
+function syncTemplateDropdown() {
+  var sel = document.getElementById('hpp-template');
+  if (!sel) return;
+  // Hapus opsi kustom lama
+  var opts = sel.querySelectorAll('option.custom-tpl');
+  opts.forEach(function(o){ o.remove(); });
+  // Tambah opsi kustom baru
+  CUSTOM_TEMPLATES.forEach(function(t, i) {
+    var o = document.createElement('option');
+    o.value = 'custom_' + i;
+    o.textContent = t.nama;
+    o.className = 'custom-tpl';
+    sel.appendChild(o);
+  });
+}
+
+// ── Show chatbot button setelah login ──
+var _origBuildSidebarFix = buildSidebar;
+buildSidebar = function(role) {
+  _origBuildSidebarFix(role);
+  var btn = document.getElementById('fab-chat-btn');
+  if (btn) {
+    btn.style.display = (role === 'boss' || role === 'admin') ? 'flex' : 'none';
+  }
+  // Render custom template list di setting jika ada
+  renderCustomTemplateList();
+  syncTemplateDropdown();
+};
+
+// ── Patch renderSetting untuk load custom templates ──
+var _origRenderSettingFix = renderSetting;
+renderSetting = function() {
+  _origRenderSettingFix();
+  renderCustomTemplateList();
+};
+
