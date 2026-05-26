@@ -3057,8 +3057,6 @@ var GAS_CODE = `// ════════════════════�
 // Deploy sebagai Web App: Execute as ME, Access: Anyone
 // ═══════════════════════════════════════════════════
 
-var SHEET_NAME = 'DataBarang'; // Nama tab sheet
-
 function doPost(e) {
   try {
     var body = JSON.parse(e.postData.contents);
@@ -3147,3 +3145,34 @@ function initBackupPage() {
   clearBackupBrgStatus();
   showBarangPreview(BARANG); // Langsung preview data lokal
 }
+
+// Tambahkan di bagian bawah script.js, setelah semua fungsi
+document.addEventListener('keydown', function(e) {
+  const aktifPage = document.querySelector('.page.on')?.id;
+  
+  // Hanya berfungsi di halaman POS (pg-input)
+  if (aktifPage === 'pg-input') {
+    switch(e.key) {
+      case 'Enter':
+        e.preventDefault();
+        if (document.getElementById('fi-kode').value) tambahKeKeranjang();
+        break;
+      case 'F2':
+        e.preventDefault();
+        document.getElementById('btn-simpan-nota').click();
+        break;
+      case 'Escape':
+        e.preventDefault();
+        batalEditTrx();
+        break;
+    }
+  }
+  
+  // Ctrl + P untuk print nota (global)
+  if (e.ctrlKey && e.key === 'p') {
+    if (currentNotaId) {
+      e.preventDefault();
+      window.print();
+    }
+  }
+});
